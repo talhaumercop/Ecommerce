@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { productId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const { productId } = params;
+    const { productId } = await context.params; // ✅ must await params now
 
     if (!productId) {
       return NextResponse.json({ error: "Missing productId" }, { status: 400 });
@@ -35,7 +35,7 @@ export async function GET(
       distribution,
     });
   } catch (err) {
-    console.error("GET /api/reviews/average error:", err);
+    console.error("GET /api/review/average error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
