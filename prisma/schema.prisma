@@ -74,14 +74,26 @@ model Products {
 }
 
 model Order {
-  id        String       @id @default(uuid())
-  userId    String
-  user      User          @relation(fields: [userId], references: [id])
-  total     Int
-  status    OrderStatus        @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  items     OrderItem[]
+  id            String       @id @default(uuid())
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id])
+  total         Int
+  status        OrderStatus  @default(PENDING)
+
+  // NEW FIELDS
+  fullName      String
+  email         String
+  phone         String
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  state         String?
+  postalCode    String
+  country       String
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         OrderItem[]
 }
 
 model OrderItem {

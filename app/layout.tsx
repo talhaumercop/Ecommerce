@@ -4,6 +4,9 @@ import "./globals.css";
 import {SessionProvider} from 'next-auth/react'
 import { auth } from "@/auth";
 import { Toaster } from "sonner";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import StairColumnsReveal from "@/components/StairLoader";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,10 +32,20 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <StairColumnsReveal/>
+        
         {children}
+        <Footer/>
         <Toaster /> 
       </body>
     </html>

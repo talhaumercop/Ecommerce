@@ -5,16 +5,24 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
-import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
-const AdminOrdersPage = () => {
+export default function AdminOrdersPage() {
   const { data: session, status } = useSession()
-
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
-  const [pendingStatus, setPendingStatus] = useState<{ orderId: string, newStatus: string } | null>(null)
+  const [pendingStatus, setPendingStatus] = useState<{ orderId: string; newStatus: string } | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const limit = 5
@@ -23,19 +31,23 @@ const AdminOrdersPage = () => {
 
   useEffect(() => {
     if (!isAdmin || status !== 'authenticated') return
+
     const fetchOrders = async () => {
       setLoading(true)
       try {
         const res = await fetch(`/api/adminOrders?page=${page}&limit=${limit}`)
         const data = await res.json()
+        if (!res.ok) throw new Error(data.error)
         setOrders(data.orders)
         setTotalPages(data.totalPages)
       } catch (err) {
         console.error(err)
+        toast.error('Failed to fetch orders')
       } finally {
         setLoading(false)
       }
     }
+
     fetchOrders()
   }, [page, status, isAdmin])
 
@@ -52,14 +64,64 @@ const AdminOrdersPage = () => {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setOrders(prev => prev.map(o => (o.id === orderId ? data : o)))
-      toast.success("Order Updated", { description: `Status changed to ${newStatus}` })
+      toast.success('Order Updated', { description: `Status changed to ${newStatus}` })
     } catch (err) {
       console.error(err)
-      toast.error("Update Failed", { description: 'Could not update order status' })
+      toast.error('Update Failed', { description: 'Could not update order status' })
     } finally {
       setUpdating(null)
       setPendingStatus(null)
     }
+  }
+
+  const handleDownload = () => {
+    if (!orders.length) {
+      toast.error('No orders to download')
+      return
+    }
+
+    const csvHeaders = [
+      'Order ID',
+      'User Name',
+      'Email',
+      'Phone',
+      'Address',
+      'City',
+      'State',
+      'Postal Code',
+      'Country',
+      'Total',
+      'Status',
+      'Created At',
+    ]
+
+    const csvRows = orders.map(order => {
+      const address = `${order.addressLine1} ${order.addressLine2 ?? ''}`.trim()
+      return [
+        order.id,
+        order.fullName,
+        order.email,
+        order.phone,
+        address,
+        order.city,
+        order.state ?? '',
+        order.postalCode,
+        order.country,
+        order.total,
+        order.status,
+        new Date(order.createdAt).toLocaleString(),
+      ].join(',')
+    })
+
+    const csvData = [csvHeaders.join(','), ...csvRows].join('\n')
+    const blob = new Blob([csvData], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `orders_page_${page}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   if (!isAdmin) return <p>Access Denied.</p>
@@ -67,7 +129,11 @@ const AdminOrdersPage = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">All Orders</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold">All Orders</h1>
+        <Button onClick={handleDownload}>Download CSV</Button>
+      </div>
+
       <div className="grid gap-4">
         {orders.map(order => (
           <Card key={order.id}>
@@ -76,6 +142,27 @@ const AdminOrdersPage = () => {
               <p className="text-sm text-gray-500">{order.user?.name ?? order.user?.email}</p>
             </CardHeader>
             <CardContent>
+              <div className="text-sm mb-2">
+                <p>
+                  <span className="font-semibold">Name:</span> {order.fullName}
+                </p>
+                <p>
+                  <span className="font-semibold">Email:</span> {order.email}
+                </p>
+                <p>
+                  <span className="font-semibold">Phone:</span> {order.phone}
+                </p>
+                <p>
+                  <span className="font-semibold">Address:</span> {order.addressLine1} {order.addressLine2}
+                </p>
+                <p>
+                  <span className="font-semibold">City:</span> {order.city}, {order.state} {order.postalCode}
+                </p>
+                <p>
+                  <span className="font-semibold">Country:</span> {order.country}
+                </p>
+              </div>
+
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Status: {order.status}</span>
 
@@ -111,7 +198,6 @@ const AdminOrdersPage = () => {
         ))}
       </div>
 
-      {/* PAGINATION */}
       <div className="flex justify-center mt-4 gap-2">
         <Button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
           Previous
@@ -124,7 +210,6 @@ const AdminOrdersPage = () => {
         </Button>
       </div>
 
-      {/* CONFIRMATION POPUP */}
       <AlertDialog open={!!pendingStatus} onOpenChange={() => setPendingStatus(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -143,5 +228,3 @@ const AdminOrdersPage = () => {
     </div>
   )
 }
-
-export default AdminOrdersPage

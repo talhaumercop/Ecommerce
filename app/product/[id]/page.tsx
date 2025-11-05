@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useCartStore } from '@/lib/store/cartStore'
 import { useSession } from 'next-auth/react'
+import { toast } from "sonner";
+import Navbar from '@/components/Navbar'
+import NavbarTwo from '@/components/NavbarTwo'
 
 type Product = {
   id?: string
@@ -33,6 +36,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null)
   const [average, setAverage] = useState(0);
   const [total, setTotal] = useState(0);
+const [open, setOpen] = useState(false);
 
   const addToCart = useCartStore((state) => state.addToCart)
 
@@ -143,7 +147,18 @@ useEffect(() => {
 
 
   if (!id) return <div>No product id provided</div>
-  if (loading) return <div>Loading product...</div>
+  if (loading) return(
+    <div className="w-full h-[100vh] flex flex-col items-center justify-center gap-6">
+  <div className="relative w-12 h-12">
+    <div className="absolute inset-0 border-4 border-red-600 animate-spin rounded-full"></div>
+    <div className="absolute inset-2 border-4 border-red-900 animate-ping rounded-full"></div>
+  </div>
+  <span className="text-red-500 tracking-widest uppercase animate-pulse">
+    Loading Vault…
+  </span>
+</div>
+
+  )
   if (error) return <div>Error: {error}</div>
   if (!product) return <div>Product not found</div>
 
@@ -152,65 +167,101 @@ useEffect(() => {
       ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)
       : product.price ?? 'N/A'
 
-  return (
-    <div className="w-[100vw] min-h-[100vh] mx-auto px-4 py-10 grid md:grid-cols-2 gap-10 bg-amber-50">
-      {/* Image Column */}
-      <div className="w-full h-[500px] rounded-2xl overflow-hidden shadow-lg bg-gray-100">
+return (
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-16 mt-20 ">
+<NavbarTwo/>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+
+      {/* IMAGE */}
+      <div className="w-full">
         {product.image ? (
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          <>
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full aspect-[9/14] md:aspect-[9/16] object-cover border rounded-lg cursor-pointer"
+              onClick={() => setOpen(true)}
+            />
+
+            {/* FULLSCREEN PREVIEW */}
+            {open && (
+              <div
+                onClick={() => setOpen(false)}
+                className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 cursor-pointer p-4"
+              >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              </div>
+            )}
+          </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+          <div className="w-full aspect-[9/16] flex items-center justify-center border rounded-lg text-sm text-gray-500">
+            No Image
+          </div>
         )}
       </div>
 
-      {/* Details Column */}
-      <div className="flex flex-col space-y-6">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900">{product.name}</h1>
-          <p className="text-2xl font-semibold text-indigo-600 mt-2">{formattedPrice}</p>
-        </div>
+      {/* DETAILS */}
+      <div className="flex flex-col gap-4 md:gap-6">
 
-        <p className="text-gray-700 leading-relaxed text-base">{product.description}</p>
+        <h1 className="text-2xl sm:text-3xl font-medium tracking-wide leading-tight">
+          {product.name}
+        </h1>
+
+        <p className="text-lg sm:text-xl font-semibold">Rs. {product.price}</p>
+
+        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+          {product.description}
+        </p>
 
         <button
           onClick={() => {
-            addToCart({
-              id: product.id!,
-              name: product.name!,
-              price: product.price!,
-              image: product.image!,
-            })
-            alert('Added to cart!')
-          }}
-          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition"
-        >
-          Add to Cart
-        </button>
- <div className="flex items-center space-x-2 mt-4">
-        {/* ⭐ Display stars */}
-        {[1, 2, 3, 4, 5].map((n) => (
-          <span key={n}>
-            {average >= n ? "⭐" : "☆"}
-          </span>
-        ))}
+  addToCart({
+    id: product.id!,
+    name: product.name!,
+    price: product.price!,
+    image: product.image!,
+  });
 
-        <span className="ml-2 text-sm text-gray-500">
-          {average.toFixed(1)} ({total} reviews)
-        </span>
-      </div>
-        {/* Reviews Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
+  toast.success("Added to Bag", {
+    description: `${product.name} is now in your cart.`,
+  });
+}}
+
+          className="bg-black text-white px-6 py-3 sm:py-3 sm:px-8 rounded-none text-sm uppercase tracking-wide hover:bg-black/80 transition"
+        >
+          Add to Bag
+        </button>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1 sm:gap-2 pt-2">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <span key={n} className="text-lg sm:text-xl">
+              {average >= n ? "⭐" : "☆"}
+            </span>
+          ))}
+          <span className="text-xs sm:text-sm text-gray-500">
+            {average.toFixed(1)} ({total} reviews)
+          </span>
+        </div>
+
+        {/* REVIEWS */}
+        <div className="pt-6 border-t mt-4">
+          <h2 className="text-lg font-medium mb-4">Reviews</h2>
 
           {/* Review Form */}
-          <div className="p-4 bg-white rounded-lg shadow-md mb-6">
-            <h3 className="text-lg font-medium mb-2">Write a review</h3>
+          <div className="p-4 border rounded-md mb-6">
+            <h3 className="text-sm font-medium mb-2">Write a Review</h3>
+
             <div className="flex items-center mb-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
                   onClick={() => setRating(star)}
-                  className={`cursor-pointer text-2xl ${
+                  className={`cursor-pointer text-xl ${
                     star <= rating ? 'text-yellow-500' : 'text-gray-300'
                   }`}
                 >
@@ -218,45 +269,50 @@ useEffect(() => {
                 </span>
               ))}
             </div>
+
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full border rounded-md p-2 mb-3"
+              className="w-full border p-2 text-sm rounded mb-3"
               placeholder="Write your review..."
             />
+
             <button
               onClick={handleReviewSubmit}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+              className="bg-black text-white px-4 py-2 text-sm uppercase hover:bg-black/80 transition"
             >
               Submit
             </button>
           </div>
 
-          {/* Display Reviews */}
+          {/* Review List */}
           {reviews.length > 0 ? (
             <div className="space-y-4">
               {reviews.map((r) => (
-                <div key={r.id} className="p-4 bg-white rounded-lg shadow-sm">
-                  <div className="flex items-center mb-2">
-                    <div className="font-semibold text-gray-800 mr-2">
-                      {r.user?.name || 'Anonymous'}
-                    </div>
-                    <div className="text-yellow-500">{'★'.repeat(r.rating)}</div>
+                <div key={r.id} className="border p-4 rounded">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium">{r.user?.name || "Anonymous"}</span>
+                    <span className="text-yellow-500 text-sm">
+                      {"★".repeat(r.rating)}
+                    </span>
                   </div>
-                  <p className="text-gray-600">{r.comment}</p>
+                  <p className="text-sm text-gray-600">{r.comment}</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    {new Date(r.createdAt ?? '').toLocaleDateString()}
+                    {new Date(r.createdAt ?? "").toLocaleDateString()}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p>No reviews yet.</p>
+            <p className="text-sm text-gray-500">No reviews yet.</p>
           )}
         </div>
       </div>
     </div>
-  )
+  </div>
+)
+
+
 }
 
 export default Page

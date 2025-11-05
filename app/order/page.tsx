@@ -26,11 +26,23 @@ const CustomerOrdersPage = () => {
     fetchOrders()
   }, [status])
 
-  if (loading) return <p>Loading...</p>
+  if (loading) {
+        return (
+           <div className="w-full h-[100vh] flex flex-col items-center justify-center gap-6">
+  <div className="relative w-12 h-12">
+    <div className="absolute inset-0 border-4 border-red-600 animate-spin rounded-full"></div>
+    <div className="absolute inset-2 border-4 border-red-900 animate-ping rounded-full"></div>
+  </div>
+  <span className="text-red-500 tracking-widest uppercase animate-pulse">
+    Loading Vault…
+  </span>
+</div>
+        );
+    }
   if (orders.length === 0) return <p>No orders found.</p>
 
   return (
-    <div className="p-6">
+    <div className="p-6 h-[100vh]">
       <h1 className="text-2xl font-semibold mb-4">Your Orders</h1>
       <div className="grid gap-4">
         {orders.map((order) => (

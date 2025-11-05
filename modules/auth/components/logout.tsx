@@ -1,18 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react"; // modern, clean icon set
 
 export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/logout", {
-        method: "POST",
-      });
-
+      const res = await fetch("/api/logout", { method: "POST" });
       if (res.ok) {
-        // Optional: redirect or reload page after logout
         router.push("/login");
       } else {
         console.error("Logout failed");
@@ -25,9 +22,14 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+      className="relative group p-2 rounded-md bg-gradient-to-r from-[#B3001B] to-[#6F1021] 
+                 hover:from-[#e21b14] hover:to-[#E2B714]/90 transition-all duration-300 shadow-md"
+      title="Logout"
     >
-      Logout
+      <LogOut
+        size={22}
+        className="text-white group-hover:text-black transition-colors duration-300"
+      />
     </button>
   );
 }
