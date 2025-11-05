@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { orderId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ orderId: string }> }
 ) {
   try {
+    const { orderId } = await context.params; // ✅ new syntax
     const session = await auth();
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -22,14 +24,12 @@ export async function PATCH(
     }
 
     // Only admins can update orders
-       const email = (session.user as any).email as string | undefined;
-
+    const email = (session.user as any).email as string | undefined;
     if (email !== process.env.ADMIN_EMAIL) {
-        console.log('not allowed', email)
+      console.log("not allowed", email);
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { orderId } = params;
     const { status } = await req.json();
 
     // Validate input
