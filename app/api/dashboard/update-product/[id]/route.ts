@@ -1,44 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
-    const body = await request.json();
-    const { name, description, image, price, isFeatured } = body;
+    const { id } = await context.params; // <- await it, new syntax
 
-    // ✅ Validate
-    if (!name || !description || !image || !price) {
-      return NextResponse.json(
-        { message: 'Missing required fields.' },
-        { status: 400 }
-      );
+    const formData = await request.formData();
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = Number(formData.get("price"));
+    const isFeatured = formData.get("isFeatured") === "true";
+
+    const file = formData.get("image") as File | null;
+    let imageBase64: string | undefined;
+
+    if (file && file.size > 0) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      imageBase64 = `data:${file.type};base64,${buffer.toString("base64")}`;
     }
 
-    // ✅ Check if product exists
-    const existing = await db.products.findUnique({ where: { id } });
-    if (!existing) {
-      return NextResponse.json(
-        { message: 'Product not found.' },
-        { status: 404 }
-      );
-    }
-
-    // ✅ Update
     const updated = await db.products.update({
       where: { id },
-      data: { name, description, image, price, isFeatured },
+      data: {
+        name,
+        description,
+        price,
+        isFeatured,
+        ...(imageBase64 ? { image: imageBase64 } : {}),
+      },
     });
 
-    return NextResponse.json(updated, { status: 200 });
+    return NextResponse.json(updated);
   } catch (error) {
-    console.error('Update failed:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error("PATCH ERROR:", error);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
