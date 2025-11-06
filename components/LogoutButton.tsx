@@ -10,7 +10,7 @@ export default function LogoutButton() {
     try {
       const res = await fetch("/api/logout", { method: "POST" });
       if (res.ok) {
-        router.push("/login");
+        router.push("/auth/sign-in");
       } else {
         console.error("Logout failed");
       }

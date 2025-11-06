@@ -4,8 +4,6 @@ import { signOut } from "next-auth/react";
 
 export async function POST() {
   try {
-    // You can’t directly call signOut() on the server.
-    // So instead, just clear the session cookie manually.
     const response = NextResponse.json({ message: "Logged out successfully" });
     response.cookies.set("authjs.session-token", "", {
       expires: new Date(0),
