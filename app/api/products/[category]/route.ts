@@ -1,16 +1,17 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { Category } from "@prisma/client";
 
 export async function GET(
   _req: Request,
   context: { params: Promise<{ category: string }> }
 ) {
   try {
-    const { category } = await context.params; // ✅ await here
+    const { category } = await context.params;
 
-    const validCategories = ["WATCH", "PANTS", "SHIRTS", "JACKETS", "DEAL"];
-    const upperCategory = category.toUpperCase();
+    const upperCategory = category.toUpperCase() as Category;
 
+    const validCategories = Object.values(Category);
     if (!validCategories.includes(upperCategory)) {
       return NextResponse.json({ error: "Invalid category" }, { status: 400 });
     }
@@ -20,7 +21,7 @@ export async function GET(
       include: { images: true },
       orderBy: { createdAt: "desc" },
     });
-    console.log(products)
+
     return NextResponse.json(products);
   } catch (error) {
     console.error(error);
