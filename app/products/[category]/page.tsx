@@ -131,33 +131,39 @@ export default function CategoryProductsPage() {
           <h1 className="text-3xl tracking-wide uppercase">Other Products</h1>
         </div> */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {others.map((product) => (
-            <div
-              key={product.id}
-              onClick={() => router.push(`/product/${product.id}`)}
-              className="border-2 border-black cursor-pointer transition-all duration-300 group"
-            >
-              <div className="relative w-full h-[350px] flex items-center justify-center overflow-hidden">
-                {product.images?.[0]?.url ? (
-                  <Image
-                    src={product.images[0].url}
-                    alt={product.name}
-                    fill
-                    className="object-contain transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                    No Image
-                  </div>
-                )}
-              </div>
-              <div className="border-t-2 border-black flex justify-between items-center px-4 py-3 text-xs tracking-wide uppercase">
-                <span>{product.name}</span>
-                <span>{product.price} Rs</span>
-              </div>
-            </div>
-          ))}
-        </div>
+  {others.map((product) => (
+    <div
+      key={product.id}
+      onClick={() => router.push(`/product/${product.id}`)}
+      className="border-2 border-black cursor-pointer transition-all duration-300 group hover:shadow-xl hover:-translate-y-1"
+    >
+      {/* IMAGE WRAPPER */}
+      <div className="w-full overflow-hidden">
+        {product.images?.[0]?.url ? (
+          <Image
+            src={product.images[0].url}
+            alt={product.name}
+            width={800}
+            height={800}
+            className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-[200px] flex items-center justify-center text-gray-400 text-sm">
+            No Image
+          </div>
+        )}
+      </div>
+
+      {/* TEXT BAR */}
+      <div className="border-t-2 border-black flex justify-between items-center px-4 py-3 text-xs tracking-wide uppercase">
+        <span>{product.name}</span>
+        <span>{product.price} Rs</span>
+      </div>
+    </div>
+  ))}
+</div>
+
+
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -18,33 +19,31 @@ export default function CreateProductPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+ async function uploadImagesToSupabase(files: File[]) {
+  const uploadedUrls: string[] = [];
 
-    const validFiles = Array.from(files).filter(
-      (file) => file.type.startsWith('image/') && file.size < 5 * 1024 * 1024
-    );
-
-    const readers = validFiles.map((file) => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+  for (const file of files) {
+    const fileName = `${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
       });
-    });
 
-    Promise.all(readers)
-      .then((base64Images) => {
-        setFormData((prev) => ({
-          ...prev,
-          images: [...prev.images, ...base64Images],
-        }));
-        setPreviews((prev) => [...prev, ...base64Images]);
-      })
-      .catch(() => setError('Error reading images'));
-  };
+    if (error) throw error;
+
+    // Get public URL
+    const { data: publicUrl } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(fileName);
+
+    uploadedUrls.push(publicUrl.publicUrl);
+  }
+
+  return uploadedUrls;
+}
+
 
   const removeImage = (index: number) => {
     setFormData((prev) => ({
@@ -66,45 +65,45 @@ export default function CreateProductPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const res = await fetch('/api/createProduct', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          price: parseInt(formData.price, 10),
-        }),
-      });
+  try {
+    // Upload all images first
+    const uploadedImageUrls = await uploadImagesToSupabase(
+      selectedFilesArray // we will define this below
+    );
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create product');
-      }
+    const res = await fetch("/api/createProduct", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        images: uploadedImageUrls, // ✅ URLs, not base64
+        price: Number(formData.price),
+      }),
+    });
+    console.log(res)
+    if (!res.ok) throw await res.json();
+  } catch (err: any) {
+    setError(err.message || "Something went wrong");
+  } finally {
+    setIsLoading(false);
+  }
+};
+const [selectedFilesArray, setSelectedFilesArray] = useState<File[]>([]);
 
-      const product = await res.json();
-      console.log('Product created:', product);
+const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files) return;
 
-      // Reset
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        isFeatured: false,
-        category: 'WATCH',
-        images: [],
-      });
-      setPreviews([]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const files = Array.from(e.target.files);
+  setSelectedFilesArray(prev => [...prev, ...files]);
+
+  const previews = files.map(file => URL.createObjectURL(file));
+  setPreviews(prev => [...prev, ...previews]);
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

@@ -4,6 +4,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    domains: [
+      "oyxbanxtjaehbboisrig.supabase.co", // 👈 add this
+    ],
     remotePatterns: [
       {
         protocol: "https",
