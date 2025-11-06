@@ -19,25 +19,26 @@ export const getProduct = async (id: string) => {
 };
 
 
-export const createProduct = async (name: string, desctiption : string, price: number , isFeatured: boolean,image:string) => {
-    try {
-        const product = await db.products.create({
-            data:{
-                name:name,
-                image:image,
-                description:desctiption,
-                price:price,
-                isFeatured:isFeatured
-            }
-        })
-        return product
-    } catch (error) {
-        console.log(error)
-    }
-}
+// export const createProduct = async (name: string, desctiption : string, price: number , isFeatured: boolean,image:string) => {
+//     try {
+//         const product = await db.product.create({
+//             data:{
+//                 name:name,
+//                 image:image,
+//                 description:desctiption,
+//                 price:price,
+//                 isFeatured:isFeatured
+//             }
+//         })
+//         return product
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
 
 export const getAllProducts = async () => {
     try {
+      // @ts-ignore
         const products = await db.product.findMany();
         return products;
     } catch (error) {

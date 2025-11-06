@@ -23,7 +23,7 @@ export async function PATCH(
       imageBase64 = `data:${file.type};base64,${buffer.toString("base64")}`;
     }
 
-    const updated = await db.products.update({
+    const updated = await db.product.update({
       where: { id },
       data: {
         name,
