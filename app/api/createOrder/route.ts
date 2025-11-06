@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     userId: user.id,
     total,
     status: status === "PAID" ? "PAID" : "PENDING",
+
     fullName: body.fullName,
     email: body.email,
     phone: body.phone,
