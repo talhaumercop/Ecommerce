@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db'; // assuming Prisma client
-import {Category} from '@prisma/client';
+import { db } from '@/lib/db';
+
+const VALID_CATEGORIES = ['WATCH', 'SHIRTS', 'PANTS', 'JACKETS', 'DEAL']; // customize this
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,12 +13,11 @@ export async function POST(req: NextRequest) {
       typeof price !== 'number' ||
       typeof isFeatured !== 'boolean' ||
       !Array.isArray(images) ||
-      !Object.values(Category).includes(category)
+      !VALID_CATEGORIES.includes(category)
     ) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    // Create product with nested image creation
     const product = await db.product.create({
       data: {
         name,
