@@ -30,8 +30,8 @@ export default function NavbarTwo() {
         ),
         React.createElement(
           Link,
-          { href: "/products", className: "hover:text-red-500 transition" },
-          "Products"
+          { href: "/collection", className: "hover:text-red-500 transition" },
+          "Collection"
         )
       ),
       // Center Title
@@ -68,7 +68,7 @@ export default function NavbarTwo() {
           },
           className: "md:hidden text-white hover:text-red-500 transition",
         },
-        React.createElement(Menu, { size: 28 })
+        React.createElement(Menu, { size: 28,color: "black" })
       )
     ),
     // ===== MOBILE MENU OVERLAY =====

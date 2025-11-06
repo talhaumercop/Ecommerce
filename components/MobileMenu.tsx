@@ -27,8 +27,8 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
       {/* Links */}
       <nav className="flex flex-col items-center space-y-6 text-lg uppercase tracking-widest">
        
-        <Link href="/featured" onClick={onClose} className="hover:text-red-500 transition">
-          Featured
+        <Link href="/order" onClick={onClose} className="hover:text-red-500 transition">
+          Orders
         </Link>
         <Link href="/collection" onClick={onClose} className="hover:text-red-500 transition">
           Collection
