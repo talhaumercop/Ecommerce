@@ -104,7 +104,7 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 h-[100vh]">
       <Card className="shadow-md">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle className="text-xl font-semibold">Products</CardTitle>

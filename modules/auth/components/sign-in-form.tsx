@@ -17,15 +17,15 @@ async function handleGoogleSignIn(){
 await signIn("google")
 }
 
-async function handleGithubSignIn(){
-"use server"
-await signIn("github")
-}
+// async function handleGithubSignIn(){
+// "use server"
+// await signIn("github")
+// }
 
 const SignInFormClient = () => {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
+    <Card className="w-full max-w-md bg-red-950 text-white shadow-lg">
+      <CardHeader className="mb-4">
         <CardTitle className="text-2xl font-bold text-center">
           Sign In
         </CardTitle>
@@ -41,12 +41,12 @@ const SignInFormClient = () => {
             <span>Sign in with google</span>
           </Button>
         </form>
-        <form action={handleGithubSignIn}>
+        {/* <form action={handleGithubSignIn}>
           <Button type="submit" variant={"outline"} className="w-full">
             <Github className="mr-2 h-4 w-4" />
             <span>Sign in with github</span>
           </Button>
-        </form>
+        </form> */}
       </CardContent>
 
       <CardFooter>

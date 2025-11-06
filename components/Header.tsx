@@ -23,14 +23,15 @@ export default function Header() {
     >
       <Navbar/>
       {/* ===== BACKGROUND (PARALLAX) ===== */}
-      <div
-        className="absolute inset-0 bg-center bg-cover transition-transform duration-300 ease-out will-change-transform"
-        style={{
-          backgroundImage: "url('/fall-back3.png')",
-          transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`,
-          filter: "brightness(0.9)",
-        }}
-      ></div>
+     <div
+  className="absolute inset-0 bg-center bg-cover transition-transform duration-300 ease-out will-change-transform"
+  style={{
+    backgroundImage: `url('${window.innerWidth < 640 ? "/mobile-banner.png" : "/fall-back3.png"}')`,
+    transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`,
+    filter: "brightness(0.9)",
+  }}
+></div>
+
 
       {/* ===== OVERLAY ===== */}
       <div className="absolute inset-0 bg-black/40 z-0"></div>

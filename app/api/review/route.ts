@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check product exists
-    const product = await db.products.findUnique({ where: { id: productId } });
+    const product = await db.product.findUnique({ where: { id: productId } });
     if (!product) return jsonError("Product not found", 404);
 
     // Optional: prevent duplicate reviews by same user (business rule)

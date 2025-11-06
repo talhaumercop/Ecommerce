@@ -51,7 +51,7 @@ const CartPage = () => {
               </p>
 
               <p className="text-sm sm:text-base mt-1">
-                ${(item.price * (item.quantity ?? 1)).toFixed(2)}
+                Rs. {(item.price * (item.quantity ?? 1)).toFixed(2)}
               </p>
             </div>
 
@@ -73,7 +73,7 @@ const CartPage = () => {
       {/* TOTAL + ACTIONS */}
       <div className="mt-10 border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h3 className="uppercase tracking-wide text-lg sm:text-xl">
-          Total: <span className="font-medium">${total.toFixed(2)}</span>
+          Total: <span className="font-medium">Rs. {total.toFixed(2)}</span>
         </h3>
 
         <div className="flex gap-4">

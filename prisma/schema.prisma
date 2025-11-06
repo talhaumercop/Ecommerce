@@ -60,18 +60,35 @@ model Account {
   @@index([userId])
 }
 
-model Products {
-  id          String     @id @default(uuid())
+enum Category {
+  WATCH
+  PANTS
+  SHIRTS
+  JACKETS
+  DEAL
+}
+
+model Product {
+  id          String        @id @default(uuid())
   name        String
   description String
-  image       String
   price       Int
-  isFeatured  Boolean
+  isFeatured  Boolean       @default(false)
+  category    Category
+  images      ProductImage[]
   orderItem   OrderItem[]
-  reviews     Review[]   // ← one product has many reviews
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  reviews     Review[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
+
+model ProductImage {
+  id         String   @id @default(uuid())
+  url        String
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
 
 model Order {
   id            String       @id @default(uuid())
@@ -101,7 +118,7 @@ model OrderItem {
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String
-  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int
   price     Int
 }
@@ -115,5 +132,5 @@ model Review {
   comment    String?
   createdAt  DateTime  @default(now())
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product    Products  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

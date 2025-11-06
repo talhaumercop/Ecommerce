@@ -3,18 +3,21 @@
 import { db } from "@/lib/db"
 
 export const getProduct = async (id: string) => {
-    try {
-        const product = await db.products.findUnique({
-            where: { id },
-            include:{
-                reviews:true
-            }
-        })
-        return product
-    } catch (error) {
-        console.log(error)
-    }
-}
+  try {
+    const product = await db.product.findUnique({
+      where: { id },
+      include: {
+        images: true,
+        reviews: true,
+      },
+    });
+    return product;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 
 export const createProduct = async (name: string, desctiption : string, price: number , isFeatured: boolean,image:string) => {
     try {
@@ -35,7 +38,7 @@ export const createProduct = async (name: string, desctiption : string, price: n
 
 export const getAllProducts = async () => {
     try {
-        const products = await db.products.findMany();
+        const products = await db.product.findMany();
         return products;
     } catch (error) {
         console.log(error);

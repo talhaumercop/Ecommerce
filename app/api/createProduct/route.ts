@@ -1,23 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createProduct } from '@/modules/products/actions';
+import { db } from '@/lib/db'; // assuming Prisma client
+import { Category } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
-    try {
-        const { name, description, price, isFeatured,image } = await req.json();
+  try {
+    const { name, description, price, isFeatured, category, images } = await req.json();
 
-        if (
-            typeof name !== 'string' ||
-            typeof description !== 'string' ||
-            typeof price !== 'number' ||
-            typeof isFeatured !== 'boolean' ||
-            typeof image !== 'string'
-        ) {
-            return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
-        }
-
-        const product = await createProduct(name, description, price, isFeatured,image);
-        return NextResponse.json(product, { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+    if (
+      typeof name !== 'string' ||
+      typeof description !== 'string' ||
+      typeof price !== 'number' ||
+      typeof isFeatured !== 'boolean' ||
+      !Array.isArray(images) ||
+      !Object.values(Category).includes(category)
+    ) {
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
+
+    // Create product with nested image creation
+    const product = await db.product.create({
+      data: {
+        name,
+        description,
+        price,
+        isFeatured,
+        category,
+        images: {
+          create: images.map((url: string) => ({ url })),
+        },
+      },
+      include: { images: true },
+    });
+
+    return NextResponse.json(product, { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+  }
 }
