@@ -26,20 +26,30 @@ export async function POST(req: Request) {
     }
 
     const order = await db.order.create({
-      data: {
-        userId: user.id,
-        total,
-        status: status === "PAID" ? "PAID" : "PENDING", // 👈 Set status dynamically
-        items: {
-          create: cart.map((item: any) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
-      include: { items: true },
-    });
+  data: {
+    userId: user.id,
+    total,
+    status: status === "PAID" ? "PAID" : "PENDING",
+    fullName: body.fullName,
+    email: body.email,
+    phone: body.phone,
+    addressLine1: body.addressLine1,
+    addressLine2: body.addressLine2,
+    city: body.city,
+    state: body.state,
+    postalCode: body.postalCode,
+    country: body.country,
+    items: {
+      create: cart.map((item: any) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    },
+  },
+  include: { items: true },
+});
+
 
     return NextResponse.json(order);
   } catch (err) {
