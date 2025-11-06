@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 
 export async function GET(
   _req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await context.params;
 
   const product = await db.product.findUnique({
     where: { id },
@@ -21,9 +21,9 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await context.params;
 
   const formData = await req.formData();
   const name = formData.get("name") as string;
@@ -31,17 +31,14 @@ export async function PATCH(
   const category = formData.get("category") as string;
   const price = Number(formData.get("price"));
   const isFeatured = formData.get("isFeatured") === "true";
-
   const images = formData.getAll("images") as File[];
 
-  // Update base product fields
   await db.product.update({
     where: { id },
     // @ts-ignore
     data: { name, description, category, price, isFeatured },
   });
 
-  // Add new images if provided
   for (const file of images) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
@@ -56,9 +53,9 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await context.params;
 
   await db.product.delete({ where: { id } });
 
